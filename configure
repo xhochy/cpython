@@ -5797,9 +5797,9 @@ if test $ac_test_CFLAGS; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O2"
+    CFLAGS="-O2"
   else
-    CFLAGS="-g"
+    CFLAGS=
   fi
 else
   if test "$GCC" = yes; then
@@ -9596,7 +9596,7 @@ then
 	    if test "$Py_DEBUG" = 'true' ; then
 		OPT="-g $PYDEBUG_CFLAGS -Wall"
 	    else
-		OPT="-g -O3 -Wall"
+		OPT="-O3 -Wall"
 	    fi
 	    ;;
 	*)
