@@ -2306,7 +2306,7 @@ then
 	    if test "$Py_DEBUG" = 'true' ; then
 		OPT="-g $PYDEBUG_CFLAGS -Wall"
 	    else
-		OPT="-g -O3 -Wall"
+		OPT="-O3 -Wall"
 	    fi
 	    ;;
 	*)
