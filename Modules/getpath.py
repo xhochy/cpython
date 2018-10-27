@@ -52,6 +52,7 @@
 # ENV_PYTHONHOME          -- [in] getenv(...)
 # ENV_PYTHONEXECUTABLE    -- [in] getenv(...)
 # ENV___PYVENV_LAUNCHER__ -- [in] getenv(...)
+# ENV_CONDA_PY_ALLOW_REG_PATHS -- [in] getenv(...)
 
 # ** Values calculated at runtime **
 # config            -- [in/out] dict of the PyConfig structure
@@ -704,7 +705,7 @@ elif not pythonpath_was_set:
     else:
         pythonpath.append(joinpath(base_prefix, ZIP_LANDMARK))
 
-    if os_name == 'nt' and use_environment and winreg:
+    if os_name == 'nt' and use_environment and winreg and ENV_CONDA_PY_ALLOW_REG_PATHS and ENV_CONDA_PY_ALLOW_REG_PATHS != '0':
         # QUIRK: Windows also lists paths in the registry. Paths are stored
         # as the default value of each subkey of
         # {HKCU,HKLM}\Software\Python\PythonCore\{winver}\PythonPath
