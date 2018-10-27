@@ -937,6 +937,7 @@ _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
         !env_to_dict(dict, "ENV_PATH", 0) ||
         !env_to_dict(dict, "ENV_PYTHONHOME", 0) ||
         !env_to_dict(dict, "ENV_PYTHONEXECUTABLE", 0) ||
+        !env_to_dict(dict, "ENV_CONDA_PY_ALLOW_REG_PATHS", 0) ||
         !env_to_dict(dict, "ENV___PYVENV_LAUNCHER__", 1) ||
         !progname_to_dict(dict, "real_executable") ||
         !library_to_dict(dict, "library") ||
