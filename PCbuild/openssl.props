@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(opensslIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(condaDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(opensslOutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(condaDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ws2_32.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -21,14 +21,4 @@
     <_SSLDLL Include="$(opensslOutDir)\libssl$(_DLLSuffix).dll" />
     <_SSLDLL Include="$(opensslOutDir)\libssl$(_DLLSuffix).pdb" />
   </ItemGroup>
-  <Target Name="_CopySSLDLL"
-          Inputs="@(_SSLDLL)"
-          Outputs="@(_SSLDLL->'$(OutDir)%(Filename)%(Extension)')"
-          Condition="$(SkipCopySSLDLL) == ''"
-          AfterTargets="Build">
-    <Copy SourceFiles="@(_SSLDLL)" DestinationFolder="$(OutDir)" />
-  </Target>
-  <Target Name="_CleanSSLDLL" Condition="$(SkipCopySSLDLL) == ''" BeforeTargets="Clean">
-    <Delete Files="@(_SSLDLL->'$(OutDir)%(Filename)%(Extension)')" TreatErrorsAsWarnings="true" />
-  </Target>
 </Project>
