@@ -110,6 +110,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Programs\python.c" />
+    <ClCompile Include="$(condaDir)include\openssl\applink.c">
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="pythoncore.vcxproj">

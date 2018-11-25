@@ -60,39 +60,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="pyproject.props" />
 
-  <PropertyGroup>
-    <IntDir>$(opensslDir)\tmp$(Bitness)dll</IntDir>
-    <OutDir>$(opensslOutDir)</OutDir>
-    <NMakeBuildCommandLine>setlocal
-set VCINSTALLDIR=$(VCInstallDir)
-if not exist "$(IntDir.TrimEnd('\'))" mkdir "$(IntDir.TrimEnd('\'))"
-cd /D "$(IntDir.TrimEnd('\'))"
-$(Perl) "$(opensslDir)\configure" $(OpenSSLPlatform) no-asm no-uplink
-nmake
-</NMakeBuildCommandLine>
-  </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-
-  <Target Name="_CopyToOutput" AfterTargets="Build">
-    <ItemGroup>
-      <_Built Include="$(opensslDir)\LICENSE" />
-      <_Built Include="$(IntDir)\libcrypto.lib;$(IntDir)\libcrypto-*.dll;$(IntDir)\libcrypto-*.pdb" />
-      <_Built Include="$(IntDir)\libssl.lib;$(IntDir)\libssl-*.dll;$(IntDir)\libssl-*.pdb" />
-      <_Include Include="$(opensslDir)\Include\openssl\*.h" />
-      <_Include Include="$(IntDir)\include\openssl\*.h" />
-    </ItemGroup>
-    <MakeDir Directories="$(opensslOutDir)\include\openssl" />
-    <Copy SourceFiles="@(_Built)" DestinationFolder="$(opensslOutDir)" />
-    <Copy SourceFiles="@(_Include)" DestinationFolder="$(opensslOutDir)\include\openssl" />
-  </Target>
-
-  <Target Name="SignFiles" AfterTargets="Build" Condition="$(_SignCommand) != ''">
-    <ItemGroup>
-      <FilesToSign Include="$(opensslOutDir)\lib*.dll" />
-    </ItemGroup>
-    <Exec Command="$(_SignCommand) %(FilesToSign.FullPath)" ContinueOnError="true" />
-  </Target>
 
   <Target Name="Clean" />
   <Target Name="CleanAll">
