@@ -80,6 +80,10 @@
 
 #ifdef MS_WINDOWS
 #  undef BYTE
+#  include <shlwapi.h>
+#  include <string.h>
+#  include <malloc.h>
+#  include <libloaderapi.h>
 #endif
 
 #define PUTS(fd, str) (void)_Py_write_noraise(fd, str, (int)strlen(str))
@@ -114,6 +118,93 @@ GENERATE_DEBUG_SECTION(PyRuntime, _PyRuntimeState _PyRuntime)
 = _PyRuntimeState_INIT(_PyRuntime, _Py_Debug_Cookie);
 _Py_COMP_DIAG_POP
 
+#ifdef MS_WINDOWS
+/*
+    This function will modify the DLL search path so that <PREFIX>/Library\bin
+    and other conda PATHS are added to the front of the DLL search path.
+*/
+
+#if !defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
+#define LOAD_LIBRARY_SEARCH_DEFAULT_DIRS 0x00001000
+#endif
+
+typedef void (WINAPI *ADD)(PCWSTR NewDirectory);
+static ADD pAddDllDirectory = NULL;
+typedef struct
+{
+    wchar_t *p_relative;
+    wchar_t *p_name;
+} CONDA_PATH;
+
+#define NUM_CONDA_PATHS 5
+
+static CONDA_PATH condaPaths[NUM_CONDA_PATHS] =
+{
+    {L"Library\\mingw-w64\\bin", NULL},
+    {L"Library\\usr\\bin", NULL},
+    {L"Library\\bin", NULL},
+    {L"Scripts", NULL},
+    {L"bin", NULL}
+};
+static wchar_t sv_dll_dirname[1024];
+
+int CondaEcosystemModifyDllSearchPath_Init()
+{
+    int debug_it = _wgetenv(L"CONDA_DLL_SEARCH_MODIFICATION_DEBUG") ? 1 : 0;
+    wchar_t* enable = _wgetenv(L"CONDA_DLL_SEARCH_MODIFICATION_ENABLE");
+    int res = 0;
+    long long j;
+    CONDA_PATH *p_conda_path;
+    HMODULE dll_handle = NULL;
+
+    if (pAddDllDirectory == NULL)
+    {
+        pAddDllDirectory = (ADD)GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "AddDllDirectory");
+
+        /* Determine sv_dll_dirname */
+        if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            (LPCSTR) &CondaEcosystemModifyDllSearchPath_Init, &dll_handle) == 0)
+        {
+            // Getting the pythonxx.dll path failed. Fall back to relative path of python.exe
+            // assuming that the executable that is running this code is python.exe
+            dll_handle = NULL;
+        }
+        GetModuleFileNameW(dll_handle, &sv_dll_dirname[0], sizeof(sv_dll_dirname)/sizeof(sv_dll_dirname[0])-1);
+        sv_dll_dirname[sizeof(sv_dll_dirname)/sizeof(sv_dll_dirname[0])-1] = L'\0';
+        if (wcsrchr(sv_dll_dirname, L'\\'))
+            *wcsrchr(sv_dll_dirname, L'\\') = L'\0';
+
+        for (p_conda_path = &condaPaths[0]; p_conda_path < &condaPaths[NUM_CONDA_PATHS]; ++p_conda_path)
+        {
+            size_t n_chars_dll_dirname = wcslen(sv_dll_dirname);
+            size_t n_chars_p_relative = wcslen(p_conda_path->p_relative);
+            p_conda_path->p_name = malloc(sizeof(wchar_t) * (n_chars_dll_dirname + n_chars_p_relative + 2));
+            wcsncpy(p_conda_path->p_name, sv_dll_dirname, n_chars_dll_dirname+1);
+            wcsncat(p_conda_path->p_name, L"\\", 2);
+            wcsncat(p_conda_path->p_name, p_conda_path->p_relative, n_chars_p_relative+1);
+        }
+
+    }
+
+    if (pAddDllDirectory == NULL)
+    {
+        if (debug_it)
+            fwprintf(stderr, L"CondaEcosystemModifyDllSearchPath() :: WARNING :: Please install KB2533623 from http://go.microsoft.com/fwlink/p/?linkid=217865\n"\
+                             L"CondaEcosystemModifyDllSearchPath() :: WARNING :: to improve conda ecosystem DLL isolation");
+        res = 2;
+    }
+    else {
+        for (j = NUM_CONDA_PATHS-1, p_conda_path = &condaPaths[NUM_CONDA_PATHS-1]; j > -1; --j, --p_conda_path)
+        {
+            if (debug_it)
+                fwprintf(stderr, L"CondaEcosystemModifyDllSearchPath() :: AddDllDirectory(%ls - ExePrefix)\n", p_conda_path->p_name);
+            pAddDllDirectory(p_conda_path->p_name);
+        }
+    }
+    return res;
+}
+
+#endif
 
 static int runtime_initialized = 0;
 
@@ -131,6 +222,10 @@ _PyRuntime_Initialize(void)
     }
     runtime_initialized = 1;
 
+#ifdef MS_WINDOWS
+    extern int CondaEcosystemModifyDllSearchPath_Init();
+    CondaEcosystemModifyDllSearchPath_Init();
+#endif
     return _PyRuntimeState_Init(&_PyRuntime);
 }
 
