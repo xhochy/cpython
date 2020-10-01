@@ -477,7 +477,12 @@ def win32_ver(release='', version='', csd='', ptype=''):
 def _mac_ver_xml():
     fn = '/System/Library/CoreServices/SystemVersion.plist'
     if not os.path.exists(fn):
-        return None
+        if 'SDKROOT' in os.environ:
+            fn = os.environ['SDKROOT'] + fn
+            if not os.path.exists(fn):
+                return None
+        else:
+            return None
 
     try:
         import plistlib
