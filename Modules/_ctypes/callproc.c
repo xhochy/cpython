@@ -1509,7 +1509,7 @@ copy_com_pointer(PyObject *self, PyObject *args)
 #ifdef HAVE_DYLD_SHARED_CACHE_CONTAINS_PATH
 #  ifdef HAVE_BUILTIN_AVAILABLE
 #    define HAVE_DYLD_SHARED_CACHE_CONTAINS_PATH_RUNTIME \
-        __builtin_available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+        __builtin_available(macOS 10.16, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
 #  else
 #    define HAVE_DYLD_SHARED_CACHE_CONTAINS_PATH_RUNTIME \
          (_dyld_shared_cache_contains_path != NULL)
@@ -1552,8 +1552,10 @@ static PyObject *py_dyld_shared_cache_contains_path(PyObject *self, PyObject *ar
          if (PyUnicode_FSConverter(name, &name2) == 0)
              return NULL;
          name_str = PyBytes_AS_STRING(name2);
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
          r = _dyld_shared_cache_contains_path(name_str);
+#pragma clang diagnostic pop
          Py_DECREF(name2);
 
          if (r) {
