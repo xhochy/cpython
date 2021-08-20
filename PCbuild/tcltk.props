@@ -12,12 +12,11 @@
     <TkMinorVersion>$([System.Version]::Parse($(TkVersion)).Minor)</TkMinorVersion>
     <TkPatchLevel>$([System.Version]::Parse($(TkVersion)).Build)</TkPatchLevel>
     <TkRevision>$([System.Version]::Parse($(TkVersion)).Revision)</TkRevision>
-    <tclDir Condition="$(tclDir) == ''">$(ExternalsDir)tcl-core-$(TclVersion)\</tclDir>
-    <tkDir Condition="$(tkDir) == ''">$(ExternalsDir)tk-$(TkVersion)\</tkDir>
-    <tcltkDir Condition="$(tcltkDir) == ''">$(ExternalsDir)tcltk-$(TclVersion)\$(ArchName)\</tcltkDir>
-    <tclWin32Exe Condition="$(Platform) == 'Win32'">$(tcltkDir)\bin\tclsh$(TclMajorVersion)$(TclMinorVersion)t.exe</tclWin32Exe>
-    <tclWin32Exe Condition="$(Platform) != 'Win32'">$(tcltkDir)\..\win32\bin\tclsh$(TclMajorVersion)$(TclMinorVersion)t.exe</tclWin32Exe>
-    <tclExternalTommath Condition="$(TclMajorVersion) == '9'">TCL_WITH_EXTERNAL_TOMMATH;</tclExternalTommath>
+    <tclDir>$(condaDir)</tclDir>
+    <tkDir>$(condaDir)</tkDir>
+    <tixDir>$(condaDir)</tixDir>
+    <tcltkDir>$(condaDir)</tcltkDir>
+    <tclWin32Exe>$(condaDir)\bin\tclsh$(TclMajorVersion)$(TclMinorVersion)t.exe</tclWin32Exe>
 
     <!--<TclDebugExt Condition="'$(Configuration)' == 'Debug'">g</TclDebugExt>-->
     <tcltkSuffix Condition="'$(TclMajorVersion)' == '8'">t</tcltkSuffix>
