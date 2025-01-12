@@ -28,6 +28,9 @@ extern "C" {
 #endif
 
 #include "pyconfig.h"
+#ifdef _WIN32
+typedef int pid_t;
+#endif
 #include "internal/pycore_ceval.h"
 
 #ifdef __linux__
