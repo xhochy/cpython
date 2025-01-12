@@ -23,6 +23,10 @@
 #  include <sys/wait.h>           // W_STOPCODE
 #endif
 
+#ifdef _MSC_VER
+typedef int pid_t;
+#endif
+
 #ifdef bool
 #  error "The public headers should not include <stdbool.h>, see gh-48924"
 #endif

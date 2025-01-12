@@ -8,6 +8,10 @@
 #include "util.h"
 #include "clinic/long.c.h"
 
+#ifdef _MSC_VER
+typedef int pid_t;
+#endif
+
 /*[clinic input]
 module _testlimitedcapi
 [clinic start generated code]*/
